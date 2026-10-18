@@ -423,7 +423,9 @@ class Search:
                 ]
             results = await search_fn(tools, query)
             if limit is not None:
-                results = results[:limit]
+                # A limit is a maximum count, not a slice offset: clamp negatives
+                # so ``limit=-1`` does not mean "all but the last match".
+                results = results[: max(limit, 0)]
             rendered = _render_tools(results, detail)
             if len(results) < catalog_size and detail != "full":
                 n = len(results)
